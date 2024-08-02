@@ -72,7 +72,8 @@ class _EditUserState extends State<EditUser> {
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
-      final data = json.decode(response.body);
+      final data = json.decode(utf8.decode(response.bodyBytes)); // Decodifica como UTF-8
+
 
       setState(() {
         _nameController.text = data['name'];

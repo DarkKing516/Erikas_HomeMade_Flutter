@@ -44,7 +44,7 @@ class pruebasApi extends State<HomePage> {
     try {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(utf8.decode(response.bodyBytes)); // Decodifica como UTF-8
         setState(() {
           _loadedUsers = data;
         });

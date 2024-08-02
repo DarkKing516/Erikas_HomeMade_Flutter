@@ -66,16 +66,19 @@ class _ordersState extends State<orders> {
 
   Future<List<dynamic>> fetchData() async {
     final response = await http
-        .get(Uri.parse('https://api-movil-rh0g.onrender.com/api/orders'));
+        .get(Uri.parse('https://erikas-homemade.onrender.com/pedidos/pedidosAPI/'));
     if (response.statusCode == 200) {
-      List<dynamic> allOrders = json.decode(response.body);
-      String userId = LoginPage
-          .odiii; // Suponiendo que LoginPage.odiii contiene el ID del usuario
-      List<dynamic> userOrders =
-          allOrders.where((order) => order['user_id'] == userId).toList();
+      List<dynamic> allOrders = json.decode(utf8.decode(response.bodyBytes)); // Decodifica como UTF-8
+      String userId = LoginPage.odiii; // Suponiendo que LoginPage.odiii es un String
+      int parsedUserId = int.parse(userId); // Convierte a int
+      print('userId: $parsedUserId, tipo: ${parsedUserId.runtimeType}');
+
+
+      List<dynamic> userOrders = allOrders.where((order) => order['id_Usuario'] == 10).toList();
+
       return userOrders;
     } else {
-      throw Exception('Failed to load data');
+      throw Exception('Error al Cargar');
     }
   }
 
@@ -139,22 +142,22 @@ class _ordersState extends State<orders> {
                                 // ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  // 'Fecha de entrega: ${order['delivery_date']}',
-                                  'Fecha de entrega: ${formatDate(order['delivery_date'])}',
+                                  // 'Fecha de entrega: ${order['fecha_pedido']}',
+                                  'Fecha de entrega: ${formatDate(order['fecha_pedido'])}',
                                   style: const TextStyle(
                                     fontSize: 18,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Estado del Pedido: ${order['order_status']}',
+                                  'Estado del Pedido: ${order['estado_pedido']}',
                                   style: const TextStyle(
                                     fontSize: 16,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Total del Pedido: \$${order['total_order']}',
+                                  'Total del Pedido: \$${order['total']}',
                                   style: const TextStyle(
                                     fontSize: 16,
                                   ),

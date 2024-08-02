@@ -44,7 +44,8 @@ class _DashboardLoginState extends State<DashboardLogin> {
     const apiUrl = 'https://api-movil-rh0g.onrender.com/api/users';
 
     final response = await http.get(Uri.parse(apiUrl));
-    final data = json.decode(response.body);
+    // final data = json.decode(response.body);
+    final data = json.decode(utf8.decode(response.bodyBytes)); // Decodifica como UTF-8
 
     setState(() {
       _loadedPosts = data;

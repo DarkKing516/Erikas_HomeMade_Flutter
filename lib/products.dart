@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Importa el paquete intl
 
 class Products extends StatelessWidget {
   final dynamic selectedOrder;
@@ -7,15 +8,37 @@ class Products extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<dynamic> products = selectedOrder['products'];
+    List<dynamic> products = selectedOrder['detalle_productos'];
+    String baseUrl = "https://raw.githubusercontent.com/DarkKing516/Erikas_HomeMade_Django/main/";
+    
+    // Si no hay productos, mostrar imagen de gatos
+    if (products.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Productos del Pedido'),
+        ),
+        body: Center(
+          child: Image.network(
+            'https://http.cat/401', // URL de la imagen de gatos
+            fit: BoxFit.cover, // Ajustar imagen
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Products of Order'),
+        title: const Text('Productos del Pedido'),
       ),
       body: ListView.builder(
         itemCount: products.length,
         itemBuilder: (context, index) {
           dynamic product = products[index];
+          String imageUrl = baseUrl + product['imagen'];
+
+          // Formatear el subtotal del producto
+          String formattedPrice = NumberFormat('#,###', 'es_CO').format(double.parse(product['subtotal_productos']));
+
           return Card(
             color: const Color.fromRGBO(225, 217, 217, 217),
             margin: const EdgeInsets.all(8),
@@ -31,21 +54,21 @@ class Products extends StatelessWidget {
                       children: [
                         const SizedBox(height: 8),
                         Text(
-                          'Producto : ${product['name']}',
+                          '${product['nombre_productos']}',
                           style: const TextStyle(
                             fontSize: 18,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Cantidad: ${product['quantity']}',
+                          'Cantidad: ${product['cant_productos']}',
                           style: const TextStyle(
                             fontSize: 16,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Precio: \$${product['price']}',
+                          'Precio: \$${formattedPrice}', // Usa el precio formateado aquí
                           style: const TextStyle(
                             fontSize: 16,
                           ),
@@ -54,7 +77,7 @@ class Products extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16), // Espacio entre el texto y la imagen
-                  _buildProductImage(product['image']),
+                  _buildProductImage(imageUrl),
                 ],
               ),
             ),

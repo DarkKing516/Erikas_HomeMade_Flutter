@@ -45,13 +45,13 @@ class _CitasState extends State<Citas> {
   }
 
   Future<List<dynamic>> fetchData() async {
-    final response = await http
-        .get(Uri.parse('https://api-movil-rh0g.onrender.com/api/dates'));
+    final response = await http.get(
+        Uri.parse('https://erikas-homemade.onrender.com/reservas/reservasAPI/'));
     if (response.statusCode == 200) {
-      List<dynamic> allData = json.decode(response.body);
+      List<dynamic> allData = json.decode(utf8.decode(response.bodyBytes)); // Decodifica como UTF-8
       // Filtrar las citas por el ID del usuario actual
       List<dynamic> filteredData =
-          allData.where((cita) => cita['user_id'] == LoginPage.odiii).toList();
+          allData.where((cita) => cita['usuario'].toString() == LoginPage.odiii).toList();
       return filteredData;
     } else {
       throw Exception('Failed to load data');
@@ -76,8 +76,7 @@ class _CitasState extends State<Citas> {
   }
 
   String formatDate(String dateStr) {
-    DateTime date =
-        DateTime.parse(dateStr); // Parse the string to a DateTime object
+    DateTime date = DateTime.parse(dateStr); // Parse the string to a DateTime object
     return DateFormat('dd/MM/yyyy').format(date); // Format the date
   }
 
@@ -91,12 +90,11 @@ class _CitasState extends State<Citas> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Text('ID Usuario: ${LoginPage.odiii}'),
-              Text('Nombre Usuario: ${journalData['user_name']}'),
-              // Text('Fecha: ${journalData['appointment_date']}'),
-              Text('Fecha: ${formatDate(journalData['appointment_date'])}'), // Formatted date
-              Text('Descripción:\n ${journalData['description']}'),
-              Text('Estado: ${journalData['status']}'),
+              Text('ID Usuario: ${journalData['usuario']}'),
+              Text('Nombre Usuario: ${LoginPage.userName}'), // Mostrar el nombre del usuario actual
+              Text('Fecha: ${formatDate(journalData['fecha_cita'])}'), // Formatted date
+              Text('Descripción:\n ${journalData['descripcion']}'),
+              Text('Estado: ${journalData['estado']}'),
             ],
           ),
           actions: [
@@ -146,21 +144,21 @@ class _CitasState extends State<Citas> {
                         children: [
                           SizedBox(height: 8),
                           Text(
-                            'Nombre Usuario: ${data[index]['user_name']}',
+                            'Nombre Usuario: ${LoginPage.userName}', // Mostrar el nombre del usuario actual
                             style: TextStyle(
                               fontSize: 18,
                             ),
                           ),
                           SizedBox(height: 8),
                           Text(
-                            'Fecha: ${formatDate(data[index]['appointment_date'])}',
+                            'Fecha: ${formatDate(data[index]['fecha_cita'])}',
                             style: TextStyle(
                               fontSize: 16,
                             ),
                           ),
                           SizedBox(height: 8),
                           Text(
-                            'Estado: ${data[index]['status']}',
+                            'Estado: ${data[index]['estado']}',
                             style: TextStyle(
                               fontSize: 16,
                             ),

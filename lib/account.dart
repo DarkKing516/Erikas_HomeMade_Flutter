@@ -126,7 +126,7 @@ class LoginForm extends State<Account> {
         }),
       );
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+        final responseData = json.decode(utf8.decode(response.bodyBytes)); // Decodifica como UTF-8
         _userName = responseData['name'];
         Account._odiii = responseData['_id']; // Guarda el ID del usuario
         Account._userName =

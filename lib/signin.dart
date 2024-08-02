@@ -118,21 +118,21 @@ class LoginForm extends State<LoginPage> {
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       final response = await http.post(
-        Uri.parse('https://api-movil-rh0g.onrender.com/api/login'),
-        headers: {"Content-Type": "application/json"},
+        Uri.parse('https://erikas-homemade.onrender.com/configuracion/loginAPI/'),
+        headers: {"Content-Type": "application/json; charset=UTF-8"},
         body: json.encode({
-          'email': _email,
-          'password': _password,
+          'correo': _email,
+          'contraseña': _password,
         }),
       );
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        _userName = responseData['name'];
-        LoginPage._odiii = responseData['_id']; // Guarda el ID del usuario
+      final responseData = json.decode(utf8.decode(response.bodyBytes)); // Decodifica como UTF-8
+        _userName = responseData['nombre'];
+        LoginPage._odiii = responseData['id'].toString(); // Guarda el ID del usuario
         LoginPage._userName =
-            responseData['username']; // Guarda el nombre de usuario
+            responseData['usuario']; // Guarda el nombre de usuario
         LoginPage._email =
-            responseData['email']; // Guarda el correo electrónico
+            responseData['correo']; // Guarda el correo electrónico
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => MyHomePage()),
