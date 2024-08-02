@@ -68,7 +68,7 @@ class _EditUserState extends State<EditUser> {
   // The function that fetches data from the API
   Future<void> _fetchData() async {
     final apiUrl =
-        'https://api-movil-rh0g.onrender.com/api/users/${LoginPage.odiii}';
+        'https://erikas-homemade.onrender.com/configuracion/usuariosAPI/${LoginPage.odiii}';
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -76,12 +76,12 @@ class _EditUserState extends State<EditUser> {
 
 
       setState(() {
-        _nameController.text = data['name'];
-        _phoneController.text = data['phone'];
-        _documentController.text = data['document'];
-        _emailController.text = data['email'];
-        _usernameController.text = data['username'];
-        _passwordController.text = data['password'];
+        _nameController.text = data['nombre'];
+        _phoneController.text = data['telefono'];
+        _documentController.text = data['documento'];
+        _emailController.text = data['correo'];
+        _usernameController.text = data['usuario'];
+        _passwordController.text = data['contraseña'];
         _loading = false;
         _error = false;
       });
@@ -97,15 +97,15 @@ class _EditUserState extends State<EditUser> {
   // Function to update user information
   Future<void> _updateUser() async {
     final apiUrl =
-        'https://api-movil-rh0g.onrender.com/api/users/${LoginPage.odiii}';
+        'https://erikas-homemade.onrender.com/configuracion/usuariosAPI/${LoginPage.odiii}';
 
     final updatedData = {
-      'name': _nameController.text,
-      'phone': _phoneController.text,
-      'document': _documentController.text,
-      'email': _emailController.text,
-      'username': _usernameController.text,
-      'password': _passwordController.text,
+      'nombre': _nameController.text,
+      'telefono': _phoneController.text,
+      'documento': _documentController.text,
+      'correo': _emailController.text,
+      'usuario': _usernameController.text,
+      'contraseña': _passwordController.text,
     };
 
     try {
