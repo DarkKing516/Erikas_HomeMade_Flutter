@@ -85,13 +85,13 @@ class _CitasState extends State<Citas> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Detalles del Elemento'),
+          title: Text('Detalles de la Reserva'),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('ID Usuario: ${journalData['usuario']}'),
-              Text('Nombre Usuario: ${LoginPage.userName}'), // Mostrar el nombre del usuario actual
+              // Text('ID Usuario: ${journalData['usuario']}'),
+              Text('Nombre: ${LoginPage.userName}'), // Mostrar el nombre del usuario actual
               Text('Fecha: ${formatDate(journalData['fecha_cita'])}'), // Formatted date
               Text('Descripción:\n ${journalData['descripcion']}'),
               Text('Estado: ${journalData['estado']}'),
