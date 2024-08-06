@@ -101,11 +101,21 @@ class LoginPage extends StatefulWidget {
   static String _odiii = '';
   static String _userName = '';
   static String _email = '';
+  static String _roluser = '';
+
+  // Declara las variables booleanas para los permisos
+  static bool _canEditReserva = false;
+  static bool _canEditEstadoPedidos = false;
 
   // Métodos estáticos para acceder a las variables
   static String get odiii => _odiii;
   static String get userName => _userName;
   static String get email => _email;
+  static String get roluser => _roluser;
+
+ // Métodos estáticos para acceder a las variables booleanas
+  static bool get canEditReserva => _canEditReserva;
+  static bool get canEditEstadoPedidos => _canEditEstadoPedidos;
 }
 
 class LoginForm extends State<LoginPage> {
@@ -128,11 +138,20 @@ class LoginForm extends State<LoginPage> {
       if (response.statusCode == 200) {
       final responseData = json.decode(utf8.decode(response.bodyBytes)); // Decodifica como UTF-8
         _userName = responseData['nombre'];
+        LoginPage._roluser = responseData['idRol']['nombre_rol'].toString(); // Guarda el nombre del rol
         LoginPage._odiii = responseData['id'].toString(); // Guarda el ID del usuario
         LoginPage._userName =
             responseData['usuario']; // Guarda el nombre de usuario
         LoginPage._email =
             responseData['correo']; // Guarda el correo electrónico
+
+        // Extrae los permisos y guarda los booleanos
+        final permisos = responseData['idRol']['permisos'] as List;
+        LoginPage._canEditReserva = permisos.any((permiso) =>
+            permiso['nombre_permiso'] == 'Editar Reservas' && permiso['estado_permiso'] == 'A');
+        LoginPage._canEditEstadoPedidos = permisos.any((permiso) =>
+            permiso['nombre_permiso'] == 'Editar Estado Pedidos' && permiso['estado_permiso'] == 'A');
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => MyHomePage()),

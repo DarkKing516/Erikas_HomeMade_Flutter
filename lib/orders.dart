@@ -68,17 +68,46 @@ class _ordersState extends State<orders> {
     final response = await http
         .get(Uri.parse('https://erikas-homemade.onrender.com/pedidos/pedidosAPI/'));
     if (response.statusCode == 200) {
-      List<dynamic> allOrders = json.decode(utf8.decode(response.bodyBytes)); // Decodifica como UTF-8
-      String userId = LoginPage.odiii; // Suponiendo que LoginPage.odiii es un String
-      int parsedUserId = int.parse(userId); // Convierte a int
+      List<dynamic> allOrders = json.decode(utf8.decode(response.bodyBytes));
+      String userId = LoginPage.odiii;
+      int parsedUserId = int.parse(userId);
       print('userId: $parsedUserId, tipo: ${parsedUserId.runtimeType}');
 
+      List<dynamic> userOrders = allOrders.where((order) => order['id_Usuario'] == parsedUserId).toList();
 
-      List<dynamic> userOrders = allOrders.where((order) => order['id_Usuario'] == 10).toList();
+      if (userOrders.isEmpty) {
+        throw Exception('No tienes pedidos actualmente');
+      }
 
       return userOrders;
     } else {
       throw Exception('Error al Cargar');
+    }
+  }
+
+  Future<void> updateOrderStatus(int orderId, String newStatus) async {
+    final response = await http.get(Uri.parse('https://erikas-homemade.onrender.com/pedidos/pedidosAPI/'));
+    if (response.statusCode == 200) {
+      List<dynamic> allOrders = json.decode(utf8.decode(response.bodyBytes));
+      dynamic orderToUpdate = allOrders.firstWhere((order) => order['idPedido'] == orderId);
+      
+      orderToUpdate['estado_pedido'] = newStatus;
+
+      final updateResponse = await http.put(
+        Uri.parse('https://erikas-homemade.onrender.com/pedidos/pedidosAPI/$orderId/'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(orderToUpdate),
+      );
+
+      if (updateResponse.statusCode == 200) {
+        print('Pedido actualizado con éxito');
+      } else {
+        throw Exception('Failed to update order');
+      }
+    } else {
+      throw Exception('Failed to load order');
     }
   }
 
@@ -91,9 +120,120 @@ class _ordersState extends State<orders> {
   }
 
   String formatDate(String dateStr) {
-    DateTime date =
-        DateTime.parse(dateStr); // Parse the string to a DateTime object
-    return DateFormat('dd/MM/yyyy').format(date); // Format the date
+    DateTime date = DateTime.parse(dateStr);
+    return DateFormat('dd/MM/yyyy').format(date);
+  }
+
+  void _showStatusDialog(BuildContext context, dynamic order) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        String selectedStatus = order['estado_pedido'];
+        List<String> statusOptions = [];
+        if(LoginPage.canEditEstadoPedidos){
+        statusOptions = ['Por hacer', 'En proceso', 'Hecho', 'Cancelado'];
+        }else{
+        statusOptions = ['Cancelado'];
+        }
+        
+        // Si el estado actual no está en la lista, usa el primer valor como predeterminado
+        if (!statusOptions.contains(selectedStatus)) {
+          selectedStatus = statusOptions[0];
+        }
+
+        return AlertDialog(
+          title: Text('Editar Estado del Pedido'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return DropdownButton<String>(
+                value: selectedStatus,
+                items: statusOptions.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedStatus = newValue!;
+                  });
+                },
+              );
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Guardar'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  await updateOrderStatus(order['idPedido'], selectedStatus);
+                  setState(() {
+                    _futureData = fetchData();  // Recargar los datos
+                  });
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error al actualizar el estado: $e')),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget buildOrderCard(dynamic order, BuildContext context) {
+    return Card(
+      color: const Color.fromRGBO(225, 217, 217, 217),
+      margin: const EdgeInsets.all(8),
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Fecha de entrega: ${formatDate(order['fecha_pedido'])}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Estado del Pedido: ${order['estado_pedido']}',
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Total del Pedido: \$${order['total']}',
+              style: const TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => _navigateToProducts(context, order),
+                  icon: Icon(Icons.visibility),
+                  label: Text('Ver Productos'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _showStatusDialog(context, order),
+                  icon: Icon(Icons.edit),
+                  label: Text('Editar Estado'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -109,76 +249,21 @@ class _ordersState extends State<orders> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text(
+                snapshot.error.toString().contains('No tienes pedidos')
+                    ? 'No tienes pedidos actualmente'
+                    : 'Error: ${snapshot.error}',
+                style: TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+            );
           } else {
             List<dynamic> data = snapshot.data!;
             return ListView.builder(
               itemCount: data.length,
               itemBuilder: (context, index) {
-                dynamic order = data[index];
-                return Card(
-                  color: const Color.fromRGBO(225, 217, 217, 217),
-                  margin: const EdgeInsets.all(8),
-                  elevation: 3,
-                  child: InkWell(
-                    onTap: () {
-                      _navigateToProducts(context, order);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // const SizedBox(height: 8),
-                                // Text(
-                                //   'ID Usuario: ${LoginPage.odiii}',
-                                //   style: const TextStyle(
-                                //     fontSize: 18,
-                                //   ),
-                                // ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  // 'Fecha de entrega: ${order['fecha_pedido']}',
-                                  'Fecha de entrega: ${formatDate(order['fecha_pedido'])}',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Estado del Pedido: ${order['estado_pedido']}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Total del Pedido: \$${order['total']}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                SizedBox(height: 8),
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    _navigateToProducts(context, order);
-                                  },
-                                  icon: Icon(Icons.visibility),
-                                  label: Text('Ver Productos'),
-                                ),
-                                // const SizedBox(width: 8),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
+                return buildOrderCard(data[index], context);
               },
             );
           }

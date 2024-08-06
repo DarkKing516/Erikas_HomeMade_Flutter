@@ -121,7 +121,7 @@ class DrawerWidget extends StatelessWidget {
           ),
           SizedBox(height: 12),
           Text(
-            LoginPage.userName.isNotEmpty ? 'Bienvenido ${LoginPage.userName}' : 'Bienvenido',
+            LoginPage.userName.isNotEmpty ? 'Bienvenido ${LoginPage.userName} (${LoginPage.roluser})' : 'Bienvenido',
             style: TextStyle(fontSize: 18, color: Colors.white),
           ),
           Text(
