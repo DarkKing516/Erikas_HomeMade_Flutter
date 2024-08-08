@@ -71,16 +71,17 @@ class DrawerWidget extends StatelessWidget {
             },
           ),
           const Divider(color: Colors.black54),
-          ListTile(
-            leading: const Icon(Icons.account_circle),
-            title: const Text('Cuenta'),
-            onTap: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => EditUser()),
-              );
-            },
-          ),
+          // ListTile(
+          //   leading: const Icon(Icons.account_circle),
+          //   title: const Text('Cuenta'),
+          //   onTap: () {
+          //     Navigator.pushReplacement(
+          //       context,
+          //       MaterialPageRoute(builder: (context) => EditUser()),
+          //     );
+          //   },
+          // ),
+
           // ListTile(
           //   leading: const Icon(Icons.account_circle),
           //   title: const Text('Cuenta'),

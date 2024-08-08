@@ -55,10 +55,10 @@ Si deseas contribuir a este proyecto, por favor sigue los siguientes pasos:
 
 ## APK
 
-[Podrás encontrar el APK aquí](https://drive.google.com/drive/folders/1NUaQJ4OOBQv5PSDWO_nKDaMVxbhEVrVn?usp=sharing).
+[Podrás encontrar el APK aquí](https://drive.google.com/file/d/1pJW2wZ1Mt1dEa3bIGWKED3d9OPfENEiA/view?usp=sharing).
 
 ## Créditos
 
-Desarrollado por [Grupo Erika's HomeMade](https://github.com/DarkKing516).
+Desarrollado por [Grupo Erika's HomeMade](https://github.com/DarkKing516/Erikas_HomeMade_Django).
 
 --- 
