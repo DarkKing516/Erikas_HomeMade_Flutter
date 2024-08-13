@@ -69,11 +69,27 @@ class _ordersState extends State<orders> {
         .get(Uri.parse('https://erikas-homemade.onrender.com/pedidos/pedidosAPI/'));
     if (response.statusCode == 200) {
       List<dynamic> allOrders = json.decode(utf8.decode(response.bodyBytes));
-      String userId = LoginPage.odiii;
-      int parsedUserId = int.parse(userId);
+      // String userId = LoginPage.odiii;
+      int deberiafuncionar = LoginPage.userIdxd;
+      print('userId: $deberiafuncionar, tipo: ${deberiafuncionar.runtimeType}');
+      String? userId = LoginPage.odiii;
+      if (userId == null || userId.isEmpty) {
+        // Maneja el caso en que el userId no está disponible o es inválido
+        print("El userId es nulo o vacío");
+        return [];
+      }
+
+      int parsedUserId;
+      try {
+        parsedUserId = int.parse(userId);
+      } catch (e) {
+        // Maneja el error en la conversión de cadena a entero
+        print("Error al convertir userId a entero: $e");
+        return [];
+      }
       print('userId: $parsedUserId, tipo: ${parsedUserId.runtimeType}');
 
-      List<dynamic> userOrders = allOrders.where((order) => order['id_Usuario'] == parsedUserId).toList();
+      List<dynamic> userOrders = allOrders.where((order) => order['id_Usuario'] == deberiafuncionar).toList();
 
       if (userOrders.isEmpty) {
         throw Exception('No tienes pedidos actualmente');

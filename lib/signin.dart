@@ -99,6 +99,7 @@ class LoginPage extends StatefulWidget {
 
   // Declara _odiii, _userName, _email como variables estáticas
   static String _odiii = '';
+  static int _userIdxd = 0;
   static String _userName = '';
   static String _email = '';
   static String _roluser = '';
@@ -109,6 +110,7 @@ class LoginPage extends StatefulWidget {
 
   // Métodos estáticos para acceder a las variables
   static String get odiii => _odiii;
+  static int get userIdxd => _userIdxd;
   static String get userName => _userName;
   static String get email => _email;
   static String get roluser => _roluser;
@@ -140,6 +142,10 @@ class LoginForm extends State<LoginPage> {
         _userName = responseData['nombre'];
         LoginPage._roluser = responseData['idRol']['nombre_rol'].toString(); // Guarda el nombre del rol
         LoginPage._odiii = responseData['id'].toString(); // Guarda el ID del usuario
+        LoginPage._userIdxd = int.tryParse(LoginPage._odiii) ?? 0; // Convierte el ID a int y maneja errores
+        print('userId: ${LoginPage._roluser}, tipo: ${LoginPage._roluser.runtimeType}');
+        print('userId: ${LoginPage._odiii}, tipo: ${LoginPage._odiii.runtimeType}');
+        print('userId: ${LoginPage._userIdxd}, tipo: ${LoginPage._userIdxd.runtimeType}');
         LoginPage._userName =
             responseData['usuario']; // Guarda el nombre de usuario
         LoginPage._email =
