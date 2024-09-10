@@ -113,9 +113,9 @@ class _CitasState extends State<Citas> {
         String selectedStatus = reservation['estado'];
         List<String> statusOptions = [];
         if(LoginPage.canEditReserva){
-        statusOptions += ['Pendiente', 'En Proceso', 'Cancelado'];
+        statusOptions += ['Pendiente', 'En proceso', 'Completada', 'Cancelada'];
         }else{
-        statusOptions += ['Cancelado'];
+        statusOptions += ['Cancelada'];
         }
         
         if (!statusOptions.contains(selectedStatus)) {

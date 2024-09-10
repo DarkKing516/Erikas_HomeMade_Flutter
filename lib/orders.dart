@@ -40,24 +40,6 @@ class orders extends StatefulWidget {
 class _ordersState extends State<orders> {
   late Future<List<dynamic>> _futureData;
 
-  void _onItemTapped(int index) {
-    if (index == 0) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MyHomePage()),
-      );
-    } else if (index == 1) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const Citas(
-            title: 'Citas',
-          ),
-        ),
-      );
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -69,12 +51,10 @@ class _ordersState extends State<orders> {
         .get(Uri.parse('https://erikas-homemade.onrender.com/pedidos/pedidosAPI/'));
     if (response.statusCode == 200) {
       List<dynamic> allOrders = json.decode(utf8.decode(response.bodyBytes));
-      // String userId = LoginPage.odiii;
       int deberiafuncionar = LoginPage.userIdxd;
       print('userId: $deberiafuncionar, tipo: ${deberiafuncionar.runtimeType}');
       String? userId = LoginPage.odiii;
       if (userId == null || userId.isEmpty) {
-        // Maneja el caso en que el userId no está disponible o es inválido
         print("El userId es nulo o vacío");
         return [];
       }
@@ -83,7 +63,6 @@ class _ordersState extends State<orders> {
       try {
         parsedUserId = int.parse(userId);
       } catch (e) {
-        // Maneja el error en la conversión de cadena a entero
         print("Error al convertir userId a entero: $e");
         return [];
       }
@@ -103,11 +82,21 @@ class _ordersState extends State<orders> {
 
   Future<void> updateOrderStatus(int orderId, String newStatus) async {
     final response = await http.get(Uri.parse('https://erikas-homemade.onrender.com/pedidos/pedidosAPI/'));
+
     if (response.statusCode == 200) {
       List<dynamic> allOrders = json.decode(utf8.decode(response.bodyBytes));
       dynamic orderToUpdate = allOrders.firstWhere((order) => order['idPedido'] == orderId);
       
+      // Actualiza el estado del pedido
       orderToUpdate['estado_pedido'] = newStatus;
+
+      // Si la evidencia de pago no es requerida, elimina el campo del objeto
+      if (orderToUpdate.containsKey('evidencia_pago')) {
+        orderToUpdate.remove('evidencia_pago');
+      }
+
+      // Imprime los datos que vas a enviar al servidor
+      print('Datos a enviar para actualizar: ${jsonEncode(orderToUpdate)}');
 
       final updateResponse = await http.put(
         Uri.parse('https://erikas-homemade.onrender.com/pedidos/pedidosAPI/$orderId/'),
@@ -116,6 +105,10 @@ class _ordersState extends State<orders> {
         },
         body: jsonEncode(orderToUpdate),
       );
+
+      // Imprime el estado de la respuesta
+      print('Estado de la respuesta PUT: ${updateResponse.statusCode}');
+      print('Respuesta del servidor: ${updateResponse.body}');
 
       if (updateResponse.statusCode == 200) {
         print('Pedido actualizado con éxito');
@@ -126,6 +119,7 @@ class _ordersState extends State<orders> {
       throw Exception('Failed to load order');
     }
   }
+
 
   void _navigateToProducts(BuildContext context, dynamic selectedOrder) {
     Navigator.push(
@@ -140,18 +134,21 @@ class _ordersState extends State<orders> {
     return DateFormat('dd/MM/yyyy').format(date);
   }
 
+  // Guardamos el contexto del Scaffold para usar en el SnackBar
   void _showStatusDialog(BuildContext context, dynamic order) {
+    final scaffoldContext = context; // Guardamos el contexto de la pantalla principal
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         String selectedStatus = order['estado_pedido'];
         List<String> statusOptions = [];
         if(LoginPage.canEditEstadoPedidos){
-        statusOptions = ['Por hacer', 'En proceso', 'Hecho', 'Cancelado'];
-        }else{
-        statusOptions = ['Cancelado'];
+          statusOptions = ['Por hacer', 'En proceso', 'Hecho', 'Cancelado'];
+        } else {
+          statusOptions = ['Cancelado'];
         }
-        
+
         // Si el estado actual no está en la lista, usa el primer valor como predeterminado
         if (!statusOptions.contains(selectedStatus)) {
           selectedStatus = statusOptions[0];
@@ -194,12 +191,16 @@ class _ordersState extends State<orders> {
                     _futureData = fetchData();  // Recargar los datos
                   });
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  // Mostrar el error completo en el SnackBar
+                  ScaffoldMessenger.of(scaffoldContext).showSnackBar(
                     SnackBar(content: Text('Error al actualizar el estado: $e')),
                   );
+                  // Imprimir el error en la consola para mayor visibilidad
+                  print("Error al actualizar el estado: $e");
                 }
               },
             ),
+
           ],
         );
       },
@@ -230,7 +231,7 @@ class _ordersState extends State<orders> {
               'Total del Pedido: \$${order['total']}',
               style: const TextStyle(fontSize: 16),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -270,7 +271,7 @@ class _ordersState extends State<orders> {
                 snapshot.error.toString().contains('No tienes pedidos')
                     ? 'No tienes pedidos actualmente'
                     : 'Error: ${snapshot.error}',
-                style: TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
             );
@@ -286,5 +287,23 @@ class _ordersState extends State<orders> {
         },
       ),
     );
+  }
+
+  void _onItemTapped(int index) {
+    if (index == 0) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MyHomePage()),
+      );
+    } else if (index == 1) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const Citas(
+            title: 'Citas',
+          ),
+        ),
+      );
+    }
   }
 }
